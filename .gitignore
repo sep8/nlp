@@ -127,3 +127,22 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+ner/data/__MACOSX/._msra
+ner/data/__MACOSX/msra/._.DS_Store
+ner/data/__MACOSX/msra/._tags.txt
+ner/data/__MACOSX/msra/._test
+ner/data/__MACOSX/msra/._train
+ner/data/__MACOSX/msra/._val
+ner/data/__MACOSX/msra/test/._sentences.txt
+ner/data/__MACOSX/msra/test/._tags.txt
+ner/data/__MACOSX/msra/train/._sentences.txt
+ner/data/__MACOSX/msra/train/._tags.txt
+ner/data/__MACOSX/msra/val/._sentences.txt
+ner/data/__MACOSX/msra/val/._tags.txt
+ner/data/msra/tags.txt
+ner/data/msra/test/sentences.txt
+ner/data/msra/test/tags.txt
+ner/data/msra/train/sentences.txt
+ner/data/msra/train/tags.txt
+ner/data/msra/val/sentences.txt
+ner/data/msra/val/tags.txt
