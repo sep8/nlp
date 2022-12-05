@@ -147,3 +147,4 @@ ner/data/msra/train/tags.txt
 ner/data/msra/val/sentences.txt
 ner/data/msra/val/tags.txt
 .DS_Store
+ner/data/ner_datasets
