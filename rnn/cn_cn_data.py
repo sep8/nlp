@@ -10,7 +10,6 @@ from torchtext.data.utils import get_tokenizer
 from collections import Counter
 from torch.utils.data import DataLoader, Dataset
 
-device = torch.device("cpu")
 
 # Turn a Unicode string to plain ASCII, thanks to
 # https://stackoverflow.com/a/518232/2809427
@@ -83,7 +82,8 @@ def filter_sentence(l1, l2, max_length):
 
 
 class TranslationDataset(Dataset):
-    def __init__(self, max_length):
+    def __init__(self, max_length, device=torch.device("cpu")):
+        self.device = device
         self.data = []
         self.pairs = []
         self.max_length = max_length
@@ -104,7 +104,7 @@ class TranslationDataset(Dataset):
         tokenizer = cn_tokenizer if is_cn else en_tokenizer
         indexes = [vocab[token] for token in tokenizer(sentence)]
         indexes = [vocab['<sos>']] + indexes + [vocab['<eos>']]
-        return torch.tensor(indexes, dtype=torch.long)
+        return torch.tensor(indexes, dtype=torch.long, device=self.device)
 
     def __getitem__(self, index):
         return self.data[index]
@@ -128,7 +128,7 @@ def to_sentence(indexes, is_cn):
     vacab = cn_vocab if (is_cn) else en_vocab
     return[vacab.get_itos()[index[0]] for index in indexes]
 
-def get_cn_en_dataloader(seq_len, batch_size):
-    train_dataset = TranslationDataset(seq_len)
+def get_cn_en_dataloader(seq_len, batch_size, device):
+    train_dataset = TranslationDataset(seq_len, device)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
-    return train_loader
+    return train_loader, train_dataset
