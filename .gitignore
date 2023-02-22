@@ -151,3 +151,9 @@ ner/data/ner_datasets
 rnn/.data/*.de
 rnn/.data/*.de.gz
 rnn/models/*.pt
+rnn/.data/test_2016_flickr.en
+rnn/.data/test_2016_flickr.en.gz
+rnn/.data/train.en
+rnn/.data/train.en.gz
+rnn/.data/val.en
+rnn/.data/val.en.gz
