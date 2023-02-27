@@ -134,8 +134,8 @@ def get_cn_en_dataloader(seq_len, batch_size, device):
     return train_loader, train_dataset
 
 def collate_padded_fn(batch):
+    batch.sort(key=lambda x: len(x[0]), reverse=True)
     source = [item[0] for item in batch] 
-    source.sort(key=lambda x: len(x), reverse=True)
     source_lengths = torch.tensor([len(item) for item in source])
     #pad them using pad_sequence method from pytorch. 
     source = pad_sequence(source, batch_first=False, padding_value=cn_vocab['<pad>'])
