@@ -32,10 +32,10 @@ def normalizeString(s, is_cn=False):
         s = re.sub(r"[^a-zA-Z.!?]+", r" ", s)
     return s
 
-def cn_tokenizer(sentence):
-    return [normalizeString(word, True) for word in list(sentence)]
+# def cn_tokenizer(sentence):
+#     return [normalizeString(word, True) for word in list(sentence)]
 
-# cn_tokenizer = get_tokenizer('spacy', language='zh_core_web_sm')
+cn_tokenizer = get_tokenizer('spacy', language='zh_core_web_sm')
 en_tokenizer_ = get_tokenizer('spacy', language='en_core_web_sm')
 
 def en_tokenizer(sentence):
@@ -86,12 +86,11 @@ class TranslationDataset(Dataset):
         self.device = device
         self.data = []
         self.pairs = []
-        self.max_length = max_length
         lines = open('data/en-cn.txt',
                      encoding='utf-8').read().strip().split('\n')
         for l in lines:
             l1, l2 = l.split('\t')
-            if (filter_sentence(l1, l2, max_length)):
+            if (max_length is None or filter_sentence(l1, l2, max_length)):
                 cn_tensor_ = self.tokenize_sentence(l2, True)
                 en_tensor_ = self.tokenize_sentence(l1, False)
                 self.data.append((cn_tensor_, en_tensor_))
@@ -148,7 +147,12 @@ def collate_padded_fn(batch):
     return (source, source_lengths), target
 
 
-def get_cn_en_padded_loader(seq_len, batch_size, device):
-    train_dataset = TranslationDataset(seq_len, device)
+def get_cn_en_padded_loader(max_length, batch_size, device):
+    train_dataset = TranslationDataset(max_length, device)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_padded_fn)
     return train_loader, train_dataset
+
+def get_cn_en_dataset(max_length, device):
+    dataset = TranslationDataset(max_length, device)
+    return dataset
+    
