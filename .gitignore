@@ -157,3 +157,4 @@ rnn/.data/train.en
 rnn/.data/train.en.gz
 rnn/.data/val.en
 rnn/.data/val.en.gz
+rnn/seq2seq/models/seq2seq_cnn.pt
