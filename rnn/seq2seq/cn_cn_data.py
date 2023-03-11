@@ -35,8 +35,8 @@ def normalizeString(s, is_cn=False):
 # def cn_tokenizer(sentence):
 #     return [normalizeString(word, True) for word in list(sentence)]
 
-cn_tokenizer = get_tokenizer('spacy', language='zh_core_web_sm')
-en_tokenizer_ = get_tokenizer('spacy', language='en_core_web_sm')
+cn_tokenizer = get_tokenizer('spacy', language='zh_core_web_md')
+en_tokenizer_ = get_tokenizer('spacy', language='en_core_web_md')
 
 def en_tokenizer(sentence):
     return en_tokenizer_(sentence)
