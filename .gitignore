@@ -147,3 +147,15 @@ ner/data/msra/train/tags.txt
 ner/data/msra/val/sentences.txt
 ner/data/msra/val/tags.txt
 .DS_Store
+ner/data/ner_datasets
+rnn/.data/*.de
+rnn/.data/*.de.gz
+rnn/models/*.pt
+rnn/.data/test_2016_flickr.en
+rnn/.data/test_2016_flickr.en.gz
+rnn/.data/train.en
+rnn/.data/train.en.gz
+rnn/.data/val.en
+rnn/.data/val.en.gz
+rnn/seq2seq/models/seq2seq_cnn.pt
+transformer/models/transformer-final.pt
