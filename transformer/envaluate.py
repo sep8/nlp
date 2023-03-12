@@ -1,41 +1,39 @@
 import torch
-from dataset import TranslationDataset, vocabs
 from transformer import Transformer
-from torch.utils.data import DataLoader
+# from dataset_multi30k import vocab_transform, data_ites, collate_fn, SRC_LANGUAGE, TGT_LANGUAGE, PAD_IDX, BOS_IDX, EOS_IDX
+from dataset_local import data_ites, vocab_transform, text_transform, SRC_LANGUAGE, TGT_LANGUAGE, PAD_IDX, BOS_IDX, EOS_IDX
 
-lang1 = 'cn'
-lang2 = 'en'
-max_lines = None
-num_test = 10
+
+SRC_VOCAB_SIZE = len(vocab_transform[SRC_LANGUAGE])
+TGT_VOCAB_SIZE = len(vocab_transform[TGT_LANGUAGE])
+seed = 0
+batch_size=32
+d_model = 256  # Embedding Size
+d_ff = 512 # FeedForward dimension
+d_k = d_v = 64  # dimension of K(=Q), V
+n_layers = 3  # number of Encoder of Decoder Layer
+n_heads = 4  # number of heads in Multi-Head Attention
+warmup_steps = 10000
 device = torch.device('mps')
 
-if __name__ == "__main__":
-    test_dataset = TranslationDataset(lang1, lang2, 'test', None, device)
-    lang1_vocab = vocabs[lang1]
-    lang2_vocab = vocabs[lang2]
-    lang1_vocab_size = len(lang1_vocab)
-    lang2_vocab_size = len(lang2_vocab)
-
-    test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
+def envaluate(model, input):
+    input_tensor = text_transform[SRC_LANGUAGE](input.rstrip("\n")).view(1, -1)
+    input_tensor = input_tensor.to(device)
+    predict = model.interface(input_tensor, start_symbol=BOS_IDX, tgt_eos=EOS_IDX)
+    translation = (' ').join(vocab_transform[TGT_LANGUAGE].lookup_tokens([n.item() for n in predict.squeeze()]))
+    return translation
     
-    d_model = 256  # Embedding Size
-    d_ff = 1024 # FeedForward dimension
-    d_k = d_v = 32  # dimension of K(=Q), V
-    n_layers = 3  # number of Encoder of Decoder Layer
-    n_heads = 4  # number of heads in Multi-Head Attention
-
-    model = Transformer(d_model, n_layers, len(lang1_vocab), len(lang2_vocab), d_k, d_v, n_heads, d_ff, device).to(device)
+        
+num_test = 10
+if __name__ == "__main__":
+    model = Transformer(d_model, n_layers, SRC_VOCAB_SIZE, TGT_VOCAB_SIZE, d_k, d_v, n_heads, d_ff, device).to(device)
     model.load_state_dict(torch.load('models/transformer-best.pt'))
-
-    for i, (enc_inputs, target) in enumerate(test_loader):
+    val_dataset = data_ites['train']
+    for i, (src, tgt) in enumerate(val_dataset):
         if i >= num_test:
             break
-        enc_input = enc_inputs[0].view(1, -1)
-        sos_token = torch.tensor([[lang1_vocab['<sos>']]], device=device)
-        enc_input = torch.cat((sos_token, enc_input), dim=1)
-        predict = model.interface(enc_input, start_symbol=lang2_vocab['<sos>'], tgt_eos=lang2_vocab['<eos>'])
-        print(''.join([lang1_vocab.get_itos()[n.item()] for n in enc_input.squeeze()]))
-        print('>', ' '.join([lang2_vocab.get_itos()[n.item()] for n in predict.squeeze()]))
-        print('=', ' '.join([lang2_vocab.get_itos()[n.item()] for n in target[0]]))
-
+        translation = envaluate(model, src)
+        print(src)
+        print('>',translation)
+        print('=', tgt)
     

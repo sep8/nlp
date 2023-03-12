@@ -1,7 +1,5 @@
 import torch
 from torch import nn
-import math
-import numpy as np
 
 
 def get_attn_pad_mask(seq_q, seq_k):
@@ -26,14 +24,14 @@ def get_attn_subsequence_mask(seq, device):
     return subsequence_mask # [batch_size, tgt_len, tgt_len]
 
 class PositionalEncoding(nn.Module):
-    def __init__(self, d_model, device, dropout=0.1, max_len=200):
+    def __init__(self, d_model, device, dropout=0.1, max_len=10000):
         super(PositionalEncoding, self).__init__()
         self.device= device
         self.dropout = nn.Dropout(p=dropout)
 
         pe = torch.zeros(max_len, d_model, device=device)
         position = torch.arange(0, max_len, dtype=torch.float, device=device).unsqueeze(1)
-        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model)).to(device)
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-torch.log(torch.tensor(10000.0)) / d_model)).to(device)
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
         pe = pe.unsqueeze(0).transpose(0, 1).to(device)
@@ -58,7 +56,7 @@ class ScaledDotProductAttention(nn.Module):
         V: [batch_size, n_heads, len_v(=len_k), d_v]
         attn_mask: [batch_size, n_heads, seq_len, seq_len]
         '''
-        scores = torch.matmul(Q, K.transpose(-1, -2)) / np.sqrt(self.d_k) # scores : [batch_size, n_heads, len_q, len_k]
+        scores = torch.matmul(Q, K.transpose(-1, -2)) / torch.sqrt(torch.tensor(self.d_k)) # scores : [batch_size, n_heads, len_q, len_k]
         scores.masked_fill_(attn_mask, -1e9) # Fills elements of self tensor with value where mask is True.
         
         attn = nn.Softmax(dim=-1)(scores)
@@ -257,10 +255,9 @@ class Transformer(nn.Module):
             # 拿出当前预测的单词(数字)。我们用x'_t对应的输出z_t去预测下一个单词的概率，不用z_1,z_2..z_{t-1}
             next_word = prob.data[-1]
             next_symbol = next_word
-            if next_symbol == tgt_eos:
+            if next_symbol.item() == tgt_eos:
                 terminal = True        
 
-        predict, _, _, _ = self.forward(enc_input, dec_input)
-        predict = predict.data.max(1, keepdim=True)[1]
-        return predict
+        predict = dec_input[:, 1:]
+        return predict.squeeze()
             
